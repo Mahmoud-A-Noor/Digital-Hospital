@@ -1,0 +1,203 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+	<div class="mb-5">
+		<h3 class="text-center">Prescriptions</h3>
+		<div class="separator"></div>
+	</div>
+	<div class="card">
+		<div class="card-body">
+			<div class="d-flex justify-content-center">
+				<ul class="nav nav-tabs">
+					<li class="nav-item">
+					<a class="nav-link active" data-bs-toggle="tab" href="#pending_prescriptions">Pending Prescriptions</a>
+					</li>
+					<li class="nav-item">
+					<a class="nav-link" data-bs-toggle="tab" href="#approved_prescriptions">Approved Prescriptions</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" data-bs-toggle="tab" href="#rejected_prescriptions">Rejected Prescriptions</a>
+					</li>
+				</ul>
+			</div>
+			<div class="tab-content">
+				<div class="tab-pane active" id="pending_prescriptions">
+					<div class="table-responsive">
+						<table id="pending_prescriptions_table" class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th>Patient Name</th>
+									<th>Department</th>
+									<th>Complaint</th>
+									<th>Prescription</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for prescription in pendding_prescriptions %}
+								<tr>
+									<td>{{prescription.patient.user.first_name|title}} {{prescription.patient.user.last_name|title}} </td>
+									<td>{{prescription.request.department}}</td>
+									<td>{{prescription.request.complaint|safe}}</td>
+									<td>{{prescription.content|safe}}</td>
+								</tr>
+								{%endfor%}
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="tab-pane" id="approved_prescriptions">
+					<div class="table-responsive">
+						<table id="approved_prescriptions_table" class="table table-striped table-bordered w-100">
+							<thead>
+								<tr>
+									<th>Patient Name</th>
+									<th>Department</th>
+									<th>Complaint</th>
+									<th>Prescription</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for prescription in approved_prescriptions %}
+								<tr>
+									<td>{{prescription.patient.user.first_name|title}}</td>
+									<td>{{prescription.request.department}}</td>
+									<td>{{prescription.request.complaint|safe}}</td>
+									<td>{{prescription.content}}</td>
+								</tr>
+								{%endfor%}
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="tab-pane" id="rejected_prescriptions">
+					<div class="table-responsive">
+						<table id="rejected_prescriptions_table" class="table table-striped table-bordered w-100">
+							<thead>
+								<tr>
+									<th>Patient Name</th>
+									<th>Department</th>
+									<th>Complaint</th>
+									<th>Prescription</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for prescription in rejected_prescriptions %}
+								<tr>
+									<td>{{prescription.patient.user.first_name|title}} {{prescription.patient.user.last_name|title}}</td>
+									<td>{{prescription.request.department}}</td>
+									<td>{{prescription.request.complaint|safe}}</td>
+									<td>{{prescription.content}}</td>
+									<td>
+										<a class="btn btn-sm btn-primary" href={% url 'doctor:patient_info' patient_id=prescription.patient.id %}>Show Patient Profile</a>
+										<button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#show_reject_reason_modal{{prescription.id}}">
+											Show Rejection Reason
+										</button>
+										<button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#update_prescription_modal{{prescription.id}}">
+											Update Prescription
+										</button>
+									</td>
+									<div>
+										<div class="modal fade" id="update_prescription_modal{{prescription.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+											<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+												<h5 class="modal-title" id="exampleModalLabel">Prescription Content</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body">
+													<form method="post" action={% url 'doctor:update_prescription' prescription_id=prescription.id %}>
+														{% csrf_token %}
+														<div class="row">
+															<div class="col-12">
+																<label class="form-label">Prescription Content:</label>
+																<textarea name="updated_content" class="form-control prescription_content" >{{prescription.content}}</textarea>
+															</div>
+														</div>
+														<div class="d-flex justify-content-end">
+															<button type="submit" class="btn btn-primary mt-3">Save</button>
+														</div>
+													</form>
+												</div>
+											</div>
+											</div>
+										</div>
+
+										<div class="modal fade" id="show_reject_reason_modal{{prescription.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+											<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+												<h5 class="modal-title" id="exampleModalLabel">Reject Reason</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body">
+													{{prescription.reject_reason}}
+							
+												</div>
+											</div>
+											</div>
+										</div>
+									</div>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock content %}
+
+
+{% block scripts %}
+	<script src={% static 'dashboard/plugins/tinymce/tinymce.min.js' %}></script>
+	<script>
+		tinymce.init({
+			selector: '.prescription_content',
+			menubar: 'edit format',
+			branding: false
+		});
+	</script>
+	<script>
+		$(document).ready(function() {
+			var table = $('#approved_prescriptions_table').DataTable( {
+				responsive: true,
+				lengthChange: false,
+				buttons: ['excel', 'pdf', 'print']
+			});
+
+			var table2 = $('#pending_prescriptions_table').DataTable( {
+				responsive: true,
+				lengthChange: false,
+				buttons: ['excel', 'pdf', 'print']
+			});
+
+			var table3 = $('#rejected_prescriptions_table').DataTable( {
+				responsive: true,
+				lengthChange: false,
+				buttons: ['excel', 'pdf', 'print']
+			});
+
+			table.buttons().container()
+				.appendTo( '#approved_prescriptions_table_wrapper .col-md-6:eq(0)' );
+			table2.buttons().container()
+				.appendTo( '#pending_prescriptions_table_wrapper .col-md-6:eq(0)' );
+			table3.buttons().container()
+				.appendTo( '#rejected_prescriptions_table_wrapper .col-md-6:eq(0)' );
+
+			$('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (event) {
+				var tabID = $(event.target).attr('href');
+				if ( tabID === '#approved_prescriptions' || tabID === '#rejected_prescriptions') {
+					$($.fn.dataTable.tables(true)).DataTable().columns.adjust().responsive.recalc();
+				}
+			});
+		});
+	</script>
+{% endblock scripts %}
+	

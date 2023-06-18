@@ -1,0 +1,103 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+
+{% block content %}
+	<div class="row">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-body">
+					<div class="row align-items-center">
+						<div class="col-lg-4">
+							<div class="position-relative">
+								<input id="search-input" type="text" class="form-control ps-5" placeholder="Search for Doctor..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+							</div>
+						</div>
+						<div class="col-lg-8">
+							<div class="float-end">
+								<form method="POST">
+									{% csrf_token %}
+									<select id="day" name="day" class="btn btn-white dropdown-toggle dropdown-toggle-nocaret px-1">
+									</select>
+									<button type="submit" onClick="storeDate()" class="btn btn-primary ms-3"><i class="fa-solid fa-filter"></i> Filter</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row row-cols-1 row-cols-md-4 product-grid">
+
+		
+		{% for doctor in doctors %}
+			<div class="col {{doctor.speciality|title}}">
+				<div class="card">
+					{% if doctor.user.img %}
+						<img src={{ doctor.user.img.url }} class="img-fluid">
+					{% else %}
+						<img src={% static 'images/user.jpg' %} class="img-fluid">
+					{% endif %}
+					
+					<div class="card-body">
+						<h6 class="card-title cursor-pointer">{{doctor.user.first_name}} {{doctor.user.last_name}}</h6>
+						<p class="text-muted">{{doctor.bio}}</p>
+						<hr>
+						<p class="text-muted">{{doctor.speciality}} Doctor</p>
+						<div class="clearfix">
+							<p class="float-start fs-7"><strong>{{online_cost}}$</strong>/ for online consultation</p>
+							<p class="float-start fs-7"><strong>{{onsite_cost}}$</strong>/ for clinic consultation</p>
+							<a class="btn btn-primary" href="{% url 'patient:create_request' %}?doctor_id={{doctor.id}}&day={{selected_day}}">Book Appointment</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endfor %}
+{% endblock content %}
+
+
+{% block scripts %}
+	<script>
+		const select_day = document.getElementById("day");
+		const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+		const today = new Date();
+
+		for (let i = 0; i < days.length; i++) {
+			const date = new Date(today);
+			date.setDate(today.getDate() + i);
+			const dayName = days[date.getDay()];
+			const option = document.createElement('option');
+			option.value = dayName.charAt(0).toLowerCase() + dayName.slice(1);
+			option.textContent = `${dayName} ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+			select_day.appendChild(option);
+		}
+
+		if(localStorage.getItem("day")) {
+			select_day.value = localStorage.getItem("day");
+		} else {
+			const today_date = new Date(today);
+			today_date.setDate(today.getDate() + i);
+			const dayName = days[today_date.getDay()];
+			select_day.value = dayName.charAt(0).toLowerCase() + dayName.slice(1);
+		}
+
+		$(document).ready(function() {
+			$('#search-input').on('keyup', function() {
+				var searchText = $(this).val().toLowerCase();
+				$('.col').each(function() {
+					var itemText = $(this).text().toLowerCase();
+					if (itemText.includes(searchText)) {
+						$(this).show();
+					} else {
+						$(this).hide();
+					}
+				});
+			});
+		});
+
+		function storeDate() {
+			localStorage.setItem("day", $("#day").val());
+		}
+	</script>
+{% endblock scripts %}

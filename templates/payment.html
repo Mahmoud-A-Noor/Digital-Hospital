@@ -1,0 +1,145 @@
+{% block content %}
+    <div class="container mt-5">
+        <div class="payment-container">
+            <div class="payment-box">
+                {% if url_name == 'payment' %}
+                    <form id="payment-form" action="{% url 'patient:payment' %}" method="post">
+                        {% csrf_token %}
+                        <script src="https://js.stripe.com/v3/"></script>
+                        <div class="form-row">
+                            <div id="card-element" class="stripe-card-element">
+                                <!-- A Stripe Element will be inserted here. -->
+                            </div>
+                            <!-- Used to display form errors. -->
+                            <div id="card-errors" class="error-message" role="alert"></div>
+                        </div>
+                        <button type="submit" class="pay-button">Pay</button>
+                    </form>
+                {% else %}
+                    <form id="payment-form" action="{% url 'patient:prescription_payment' total_cost=total_cost %}" method="post">
+                        {% csrf_token %}
+                        <script src="https://js.stripe.com/v3/"></script>
+                        <div class="form-row">
+                            <div id="card-element" class="stripe-card-element">
+                                <!-- A Stripe Element will be inserted here. -->
+                            </div>
+                            <!-- Used to display form errors. -->
+                            <div id="card-errors" class="error-message" role="alert"></div>
+                        </div>
+                        <button type="submit" class="pay-button">Pay</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+<script>
+
+    // Create a Stripe client.
+    var stripe = Stripe('pk_test_51NBDRhF7Tb2QLOOudca0f3fqyL5HKWtdg0A5CJTCnDyu86iKWm8h9jksKjZqDO5nusMyoFvKeRQ3Z3A46dEAYUZf00DsimQ1Yw');
+
+    // Create an instance of Elements.
+    var elements = stripe.elements();
+
+    // Custom styling can be passed to options when creating an Element.
+    // (See https://stripe.com/docs/js/element/options for more details.)
+    var style = {
+        base: {
+            // Add your base input styles here. For example:
+            fontSize: '16px',
+            color: '#32325d',
+        },
+    };
+
+    // Create an instance of the card Element.
+    var card = elements.create('card', { style: style });
+
+    // Add an instance of the card Element into the `card-element` <div>.
+    card.mount('#card-element');
+
+    // Handle real-time validation errors from the card Element.
+    card.addEventListener('change', function (event) {
+        var displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    // Handle form submission.
+    var form = document.getElementById('payment-form');
+    var payButton = form.querySelector('.pay-button');
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        payButton.disabled = true;
+
+        stripe.createToken(card).then(function (result) {
+            if (result.error) {
+                // Inform the user if there was an error.
+                var errorElement = document.getElementById('card-errors');
+                errorElement.textContent = result.error.message;
+                // Re-enable the pay button if there was an error
+                payButton.disabled = false;
+            } else {
+                // Send the token to your server.
+                stripeTokenHandler(result.token);
+            }
+        });
+    });
+
+    // Submit the form with the token ID.
+    function stripeTokenHandler(token) {
+        var form = document.getElementById('payment-form');
+        var hiddenInput = document.createElement('input');
+        hiddenInput.setAttribute('type', 'hidden');
+        hiddenInput.setAttribute('name', 'stripeToken');
+        hiddenInput.setAttribute('value', token.id);
+        form.appendChild(hiddenInput);
+
+        // Submit the form.
+        form.submit();
+    }
+</script>
+
+<style>
+    .payment-box {
+        max-width: 500px; /* Set the maximum width to control the size */
+        margin: 0 auto; /* Center the box horizontally */
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+    }
+    
+    .stripe-card-element {
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .error-message {
+        color: red;
+        margin-top: 10px;
+    }
+    
+    .pay-button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+    
+    .pay-button:hover {
+        background-color: #45a049;
+    }
+</style>    

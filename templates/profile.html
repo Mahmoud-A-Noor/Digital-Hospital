@@ -1,0 +1,100 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+	{% block content %}
+		<div class="row">
+			<div class="col-xl-7 mx-auto">
+				{% if messages %}
+					{% for message in messages %}
+						{% if message.tags %}
+							{% if message.tags == 'success' %}
+								<div id="login_alert" class="alert alert-success" role="alert">
+									{{ message }}
+								</div>
+							{% elif message.tags == 'error' %}
+								<div id="login_alert" class="alert alert-danger" role="alert">
+									{{ message }}
+								</div>
+							{% elif message.tags == 'warning' %}
+								<div id="login_alert" class="alert alert-warning" role="alert">
+								{{ message }}
+								</div>
+							{% elif message.tags == 'info' %}
+								<div id="login_alert" class="alert alert-info" role="alert">
+								{{ message }}
+								</div>
+							{% endif %}
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+				<div class="card border-top border-0 border-4 border-primary">
+					<div class="card-body p-5">
+						<div class="card-title d-flex align-items-center">
+							<div><i class="bx bxs-user me-1 font-22 text-primary"></i>
+							</div>
+							<h5 class="mb-0 text-primary">Update Profile</h5>
+						</div>
+						<hr>
+						<form method="POST" enctype="multipart/form-data" class="row g-3">
+							{% csrf_token %}
+							<div class="col-md-6">
+								<label class="form-label">First Name</label>
+								<input type="text" class="form-control" id="first_name" name="first_name" value="{{user.first_name}}">
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">Last Name</label>
+								<input type="text" class="form-control" id="last_name" name="last_name" value="{{user.last_name}}">
+							</div>
+							<div class="col-md-12">
+								<label class="form-label">Email</label>
+								<input type="email" class="form-control" id="email" name="email" value="{{user.email}}">
+							</div>
+							<div class="col-md-12">
+								<label class="form-label">Phone Number</label>
+								<input type="text" class="form-control" id="phone_number" name="phone_number" value="{{user.phone_number}}" required>
+							</div>
+							<div class="col-md-12">
+								<label class="form-label">Old Password</label>
+								<input type="password" class="form-control" id="old_password" name="old_password">
+							</div>
+							<div class="col-md-12">
+								<label class="form-label">New Password</label>
+								<input type="password" class="form-control" id="new_password" name="new_password">
+							</div>
+							<div class="col-md-12">
+								<label class="form-label">Date of Birth</label>
+								<input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ user.date_of_birth|date:'Y-m-d' }}">
+							</div>
+							<div class="col-12">
+								<label class="form-label">Address</label>
+								<textarea style="resize: none;" class="form-control" id="address" name="address" rows="4">{{user.address}}</textarea>
+							</div>
+							<div class="col-md-12">
+								<label class="form-label">Image</label>
+								<input type="file" class="form-control" id="img" name="img">
+								{% if user.img %}
+									<img src="{{ user.img.url }}"  id="previewImage">
+								{% else %}
+									<img src={% static 'images/user.jpg' %}  id="previewImage">
+								{% endif %}
+							</div>
+							<div class="col-12">
+								<button type="submit" class="btn btn-primary px-5">Update Profile</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endblock content %}
+	{% block scripts %}
+		<script>
+			var alertElem = document.getElementById("login_alert");
+			if (alertElem) {
+				setTimeout(function() {
+				alertElem.style.display = "none";
+				}, 2000);
+			}
+		</script>
+		<script src={% static 'dashboard/js/previewImage.js' %}></script>
+	{% endblock scripts %}

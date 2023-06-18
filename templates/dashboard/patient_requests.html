@@ -1,0 +1,162 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+	<div class="mb-5">
+		<h3 class="text-center">Requests</h3>
+		<div class="separator"></div>
+		{% if messages %}
+			{% for message in messages %}
+				{% if message.tags %}
+					{% if message.tags == 'success' %}
+						<div id="login_alert" class="alert alert-success" role="alert">
+							{{ message }}
+						</div>
+					{% elif message.tags == 'error' %}
+						<div id="login_alert" class="alert alert-danger" role="alert">
+							{{ message }}
+						</div>
+					{% elif message.tags == 'warning' %}
+						<div id="login_alert" class="alert alert-warning" role="alert">
+						  {{ message }}
+						</div>
+					{% elif message.tags == 'info' %}
+						<div id="login_alert" class="alert alert-info" role="alert">
+						  {{ message }}
+						</div>
+					{% endif %}
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+	</div>
+	<div class="card">
+		<div class="card-body">
+			<div class="d-flex justify-content-center">
+				<ul class="nav nav-tabs">
+					<li class="nav-item">
+					<a class="nav-link active" data-bs-toggle="tab" href="#pending_requests">Pending Requests</a>
+					</li>
+					<li class="nav-item">
+					<a class="nav-link" data-bs-toggle="tab" href="#previous_requests">Previous Requests</a>
+					</li>
+				</ul>
+			</div>
+
+			<div class="tab-content">
+				<div class="tab-pane container active" id="pending_requests">
+					<div class="table-responsive">
+						<table id="pending_requests_table" class="table table-striped table-bordered ">
+							<thead>
+								<tr>
+									<th>Department</th>
+									<th>Online</th>
+									<th>Created At</th>
+									<th>Complaint</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody> 
+                                {% for request in open_requests %}
+                                    <tr>
+                                        <td>{{request.department}}</td>
+                                        
+                                        {% if request.online %}
+                                            <td>Yes</td>
+                                        {% else %}
+                                            <td>No</td>
+                                        {% endif %}
+                                            
+                                        <td>{{request.created_at}}</td>
+                                        <td>{{request.complaint|safe}}</td>
+                                        <td>
+                                            <form method="post" action="{% url 'patient:cancel_request' request_id=request.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger">Cancel Request</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+							</tbody>
+						</table>
+					</div>						
+				</div>
+
+				<div class="tab-pane container" id="previous_requests">
+					<div class="table-responsive ">
+						<table id="previous_requests_table" class="table table-striped table-bordered w-100">
+							<thead>
+								<tr>
+									<th>Department</th>
+									<th>Online</th>
+									<th>Created At</th>
+									<th>Complaint</th>
+								</tr>
+							</thead>
+							<tbody>
+								
+                                {% for request in closed_requests %}
+                                    <tr>
+                                        <td>{{request.department}}</td>
+                                        
+                                        {% if request.online %}
+                                            <td>Yes</td>
+                                        {% else %}
+                                            <td>No</td>
+                                        {% endif %}
+                                            
+                                        <td>{{request.created_at}}</td>
+                                        <td>{{request.complaint|safe}}</td>
+                                    </tr>
+                                {% endfor %}                                    
+							</tbody>
+						</table>
+					</div>						
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock content %}
+	
+
+
+{% block scripts %}
+	<script>
+		$(document).ready(function() {
+			var table = $('#previous_requests_table').DataTable( {
+				responsive: true,
+				lengthChange: false,
+				buttons: ['excel', 'pdf', 'print']
+			});
+
+			var table2 = $('#pending_requests_table').DataTable( {
+				responsive: true,
+				lengthChange: false,
+				buttons: ['excel', 'pdf', 'print']
+			});
+
+			table.buttons().container()
+				.appendTo( '#previous_requests_table_wrapper .col-md-6:eq(0)' );
+
+			table2.buttons().container()
+				.appendTo( '#pending_requests_table_wrapper .col-md-6:eq(0)' );
+
+			$('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (event) {
+				var tabID = $(event.target).attr('href');
+				if ( tabID === '#previous_requests' ) {
+					$($.fn.dataTable.tables(true)).DataTable().columns.adjust().responsive.recalc();
+				}
+			});
+		});
+	</script>
+	<script>
+		var alertElem = document.getElementById("login_alert");
+		if (alertElem) {
+		  setTimeout(function() {
+			alertElem.style.display = "none";
+		  }, 2000);
+		}
+	  </script>
+{% endblock scripts %}
+	

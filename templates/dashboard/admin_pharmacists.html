@@ -1,0 +1,93 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+
+{% block content %}
+	<div class="mb-5">
+		<h3 class="text-center">Pharmacists</h3>
+		<div class="separator"></div>
+	</div>
+    <div class="page-breadcrumb d-sm-flex align-items-center mb-3">
+        <div class="ms-auto">
+            <a class="btn btn-primary" href={% url 'system_admin:add_pharmacist' %}>
+                Add Pharmacist
+            </a>
+        </div>
+    </div>
+	<div class="card">
+		<div class="card-body">
+            <div class="table-responsive">
+                <table id="pharmacists_table" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Date of Birth</th>
+                                <th>Address</th>
+                                <th>Image</th>
+                                <th>Action</th>
+                            </tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pharmacist in pharmacists %}
+                            <tr>
+                                <td>{{pharmacist.user.first_name|title}} {{pharmacist.user.last_name|title}}</td>
+                                <td>{{pharmacist.user.email}}</td>
+                                <td>{{pharmacist.user.date_of_birth}}</td>
+                                <td>{{pharmacist.user.address}}</td>
+                                <td>
+                                    {% if pharmacist.user.img %}
+                                        <img width="100" height="100" src={{doctor.user.img.url}}>
+                                    {% else %}
+                                        <img width="100" height="100" src={% static 'images/user.jpg' %}>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#delete_pharmacist_modal{{pharmacist.id}}">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                            <div>
+                                <div class="modal fade" id="delete_pharmacist_modal{{pharmacist.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Delete Pharmacist</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure that you want to delete this pharmacist ?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a class="btn btn-primary" href={% url 'system_admin:delete_pharmacist' pharmacist_id=pharmacist.id %}>Save</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+		</div>
+	</div>
+{% endblock content %}
+	
+
+{% block scripts %}
+	<script>
+		$(document).ready(function() {
+			var table = $('#pharmacists_table').DataTable( {
+				lengthChange: false,
+				responsive: true,
+				buttons: ['excel', 'pdf', 'print']
+			});
+
+			table.buttons().container()
+				.appendTo( '#pharmacists_table_wrapper .col-md-6:eq(0)' );
+		});
+	</script>
+{% endblock scripts %}

@@ -1,0 +1,59 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-md navbar-white bg-white py-3">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'home' %}">
+        <div>
+					<img src={% static 'dashboard/images/logo.png' %} class="logo" alt="logo icon">
+          <span class="logo-text">Digital Hospital</span>
+				</div>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-md-0">
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == '/' %}active{% endif %}" aria-current="page" href="{% url 'home' %}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == '/about-us/' %}active{% endif %}" href="{% url 'about-us' %}">About Us</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == '/contact-us/' %}active{% endif %}" href="{% url 'contact-us' %}">Contact Us</a>
+          </li>
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              {% if user.user_type == "manager" %}
+                <a class="nav-link" href="{% url 'system_admin:add_doctor' %}">
+                  Dashboard
+                </a>
+              {% elif user.user_type == "patient" %}
+                <a class="nav-link" href="{% url 'patient:requests' %}">
+                  Dashboard
+                </a>
+              {% elif user.user_type == "doctor" %}
+                <a class="nav-link" href="{% url 'doctor:requests' %}">
+                  Dashboard
+                </a>
+              {% elif user.user_type == "pharmacist" %}
+                <a class="nav-link" href="{% url 'pharmacist:prescriptions' %}">
+                  Dashboard
+                </a>
+              {% endif %}
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link my-auto" href="{% url 'accounts:login' %}">
+                <div class="d-flex align-items-center">
+                  <i class='bx bxs-user fs-4'></i>
+                  <span>&nbsp;Login</span>
+                </div>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>

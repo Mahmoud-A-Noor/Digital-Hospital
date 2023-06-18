@@ -1,0 +1,81 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+  {% block styles %}
+    <style>
+      body{
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      }
+    </style>
+  {% endblock %}
+
+
+  {% block content %}
+
+    <section class="py-5">
+      <h3 class="text-center mt-5">Login</h3>
+      <div class="separator"></div>
+      <div class="container mt-5">
+          <div class="row">
+            <div class="col-md-6 col-10 m-auto section-bg thyroid_section p-5">
+              {% if messages %}
+                {% for message in messages %}
+                  {% if message.tags %}
+                    {% if message.tags == 'success' %}
+                      <div id="login_alert" class="alert alert-success" role="alert">
+                        {{ message }}
+                      </div>
+                    {% elif message.tags == 'error' %}
+                      <div id="login_alert" class="alert alert-danger" role="alert">
+                        {{ message }}
+                      </div>
+                    {% elif message.tags == 'warning' %}
+                      <div id="login_alert" class="alert alert-warning" role="alert">
+                        {{ message }}
+                      </div>
+                    {% elif message.tags == 'info' %}
+                      <div id="login_alert" class="alert alert-info" role="alert">
+                        {{ message }}
+                      </div>
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+              <form method="POST">
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col-12 mb-3">
+                      <label class="form-label">Email <span class="required">*</span></label>
+                      <input type="email" class="form-control" name="email" placeholder="Your Email">
+                  </div>
+
+                  <div class="col-12 mb-3">
+                      <label class="form-label">Password <span class="required">*</span></label>
+                      <input type="password" class="form-control" name="password" placeholder="Your Password">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+
+                <div class="col-12 mt-2">
+                  <p>Don't have an account? <a class="text-decoration-none" href="{% url 'accounts:register' %}">Register</a></p>
+                </div>
+              </form>
+            </div>
+          </div>
+      </div>
+    </section>
+  {% endblock %}
+
+
+  {% block scripts %}
+    <script>
+      var alertElem = document.getElementById("login_alert");
+      if (alertElem) {
+        setTimeout(function() {
+          alertElem.style.display = "none";
+        }, 2000);
+      }
+    </script>
+  {% endblock %}

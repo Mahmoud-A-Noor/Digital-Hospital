@@ -1,0 +1,147 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+
+{% block content %}
+	<div class="container">
+		<div class="main-body">
+			
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card">
+						<div class="card-body">
+							{% if request.user.user_type == 'patient' %}
+								<div class="page-breadcrumb d-sm-flex align-items-center mb-3">
+									<div class="ms-auto">
+										<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_record_modal">
+											Add Health Record
+										</button>
+	
+										<div class="modal fade" id="add_record_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+											<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+												<h5 class="modal-title" id="exampleModalLabel">Health Record</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body">
+													<form method="post" enctype="multipart/form-data">
+														{% csrf_token %}
+														<div class="row">
+															<div class="col-12 mb-3">
+																<label class="form-label">Title:</label>
+																<input type="text" name="record_name" class="form-control" required>
+															</div>
+	
+															<div class="col-12 mb-3">
+																<label class="form-label">Redcord Date:</label>
+																<input type="date" name="record_date" class="form-control" required>
+															</div>
+	
+															<div class="col-12 mb-3">
+																<label class="form-label">Upload your health record:</label>
+																<input type="file" name="record_file" id="img" class="form-control" required>
+																<img id="previewImage" class="mt-3 d-none">
+															</div>
+														</div>
+														<div class="d-flex justify-content-end">
+															<button type="submit" class="btn btn-primary mt-3">Add</button>
+														</div>
+													</form>
+												</div>
+											</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							{% endif %}
+							<div class="d-flex flex-column align-items-center text-center">
+								{% if patient.user.img %}
+									<img src="{{ patient.user.img.url }}" alt="Admin" class="rounded-circle p-1 bg-primary" width="110">
+								{% else %}
+									<img src={% static 'images/user.jpg' %} alt="Admin" class="rounded-circle p-1 bg-primary" width="110">
+								{% endif %}
+								<div class="mt-3">
+									<h3>{{patient.user.first_name}} {{patient.user.last_name}}</h3>
+									<p class="text-secondary mb-1">Birth Date: {{patient.user.date_of_birth}}</p>
+									<p class="text-secondary mb-1">Email: <a href={{patient.user.email}}>{{patient.user.email}}</a></p>
+								</div>
+							</div>
+							<hr>
+							<div class="mt-3">
+								<h4>Medical History:</h4>
+								<div class="row">
+									{% for record in records %}
+										{% if record.file_type == "pdf" %}
+											<div class="col-md-4 col-12">
+												<p class="fs-6 text-dark text-center">{{record.name}}</p>
+												<div class="record-img-div position-relative">
+													<div class="delete-record">
+														<button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#delete_record_modal">
+															<i class="fa-solid fa-xmark fs-5"></i>
+														</button>
+													</div>
+													<div class="d-flex justify-content-center align-items-center record-img">
+														<a class="d-flex justify-content-center align-items-center" href={{record.file.url}} download>
+															<span class="fs-5">{{record.file_name}} </span>
+															<i class="fa-solid fs-5 fa-download"></i>
+														</a>
+													</div>
+												</div>
+												<p class="fs-6 text-dark text-center">{{record.date}}</p>
+											</div>
+										{% else %}
+											<div class="col-md-4 col-12 position-relative">
+												<p class="fs-6 text-dark text-center">{{record.name}}</p>
+												<div class="position-relative record-img-div">
+													<div class="delete-record">
+														<button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#delete_record_modal">
+															<i class="fa-solid fa-xmark fs-5"></i>
+														</button>
+													</div>
+													<img class="record-img rounded-3" src={{record.file.url}} %}>
+												</div>
+												<p class="fs-6 text-dark text-center">{{record.date}}</p>
+											</div>
+										{% endif %}
+											<div class="modal fade" id="delete_record_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+												<div class="modal-dialog">
+												<div class="modal-content">
+													<div class="modal-header">
+													<h5 class="modal-title" id="exampleModalLabel">Delete Health Record</h5>
+													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+													</div>
+													<div class="modal-body">
+														Are you sure that you want to remove this record?
+													</div>
+													<div class="modal-footer">
+													<!-- <button name="approved" value="False" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
+													<a class="btn btn-primary" href="{% url 'patient:delete_record' record_id=record.id %}">Delete</a>
+													</div>
+												</div>
+												</div>
+											</div>
+									{% empty %}
+										{% if request.user.user_type == 'patient' %}
+										<div class="d-flex justify-content-center">
+											<img src={% static 'dashboard/images/no_data.png' %} class="img-fluid rounded-circle w-50" alt="">
+										</div>
+										<h4 class="text-center text-secondary">You have no records available, Start adding your records now ! </h4>
+										{% else %}
+											<h3>Patient have no records available</h3>
+										{% endif %}
+									{% endfor %}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock content %}
+
+{% block scripts %}
+  <script src={% static 'js/previewImage.js' %}></script>
+{% endblock %}
+	

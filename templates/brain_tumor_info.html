@@ -1,0 +1,29 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+  {% block styles %}
+  <style>
+    body{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    }
+  </style>
+    <link rel="stylesheet" href={% static 'css/aos.css' %}>
+  {% endblock %}
+
+
+  {% block content %}
+    <section class="py-5 text-center mt-5">
+        <h3>Brain Tumor</h3>
+        <div class="separator"></div>
+        <div class="container mt-5">
+            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Fuga veniam itaque illo praesentium corporis soluta porro rerum ex, officiis ab voluptatibus commodi nemo sint quidem quam, possimus facilis nulla quisquam. Lorem ipsum dolor sit amet consectetur adipisicing elit. Nesciunt consequuntur quae recusandae at, sed asperiores, explicabo perspiciatis minus quos cum repellat. Officiis nostrum magnam aliquam consequuntur fugit, expedita illo fuga? Lorem ipsum dolor sit amet consectetur, adipisicing elit. At nisi explicabo sed fugit ut voluptatem ex vel? Provident impedit autem assumenda voluptatum minus delectus velit nesciunt, aliquam magni magnam consequatur?</p>
+            <a href="{% url 'accounts:register' %}" class="btn btn-primary text-decoration-none">Register Now!</a>
+        </div>
+    </section>
+  {% endblock %}
+
+
+  {% block scripts %}
+  {% endblock %}

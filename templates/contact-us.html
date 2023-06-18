@@ -1,0 +1,58 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+  {% block styles %}
+    <link rel="stylesheet" href={% static 'css/aos.css' %}>
+  {% endblock %}
+
+
+  {% block content %}
+    <section class="pt-5 my-5">
+      <h3 class="text-center">Contact Us</h3>
+      <div class="separator"></div>
+      <div class="container">
+          <div class="row">
+            <div class="col-md-6 col-12" data-aos="fade-right" data-aos-duration="2000" data-aos-delay="300">
+              <img class="img-fluid" src={% static 'images/5124556.jpg' %}>
+            </div>
+            <div class="col-md-6 col-12 m-auto" data-aos="fade-left" data-aos-duration="2000" data-aos-delay="300">
+              <form method="POST">
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col-md-6 col-12 mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" name="name">
+                  </div>
+                  <div class="col-md-6 col-12 mb-3">
+                    <label class="form-label">Email address</label>
+                    <input type="email" class="form-control" name="email">
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Your Message</label>
+                    <textarea class="form-control" rows="5" style="resize: none;" name="message"></textarea>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+              </form>
+            </div>
+          </div>
+      </div>
+  </section>
+  {% endblock %}
+
+
+  {% block scripts %}
+    <script src={% static 'js/aos.js' %}></script>
+    <script>
+      AOS.init({
+        disable: 'phone'
+      });
+    </script>
+  {% endblock %}
+
+
+</body>
+<script src={% static 'js/bootstrap.bundle.min.js' %}></script>
+
+<script src={% static 'js/main.js' %}></script>
+</html>

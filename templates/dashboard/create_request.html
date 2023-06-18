@@ -1,0 +1,141 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+<style>
+	.tox-statusbar {
+      display: none !important;
+    }
+</style>
+{% block content %}
+	<div class="card py-3">
+		<div class="row">
+			<div class="col-md-3 col-12">
+				{% if doctor.user.img %}
+					<img src="{{ doctor.user.img.url }}" class="img-fluid w-100">
+				{% else %}
+					<img src={% static 'images/user.jpg' %} class="img-fluid w-100">
+				{% endif %}
+				<div class="container text-center">
+					<h5 class="card-title">Dr. {{doctor.user.first_name}} {{doctor.user.last_name}}</h5>
+					<p>{{doctor.bio}}</p>
+					
+					<div class="mb-3"> 
+						<span class="price h6">${{online_cost}}</span>
+						<span class="text-muted">/ for online consultation</span> 
+					</div>
+		
+					<div class="mb-3"> 
+						<span class="price h6">${{onsite_cost}}</span>
+						<span class="text-muted">/ for clinic consultation</span> 
+					</div>
+				</div>
+			</div>
+			<div class="col-md-8 col-12">
+				<div class="card-body">
+					<form method="POST" action="{% url 'patient:create_request' %}">
+						{% csrf_token %}
+						<div class="row">
+							<div class="col-12 mb-3">
+								<label class="form-label">Complaint:</label>
+								<textarea id="request_content" name="complaint" rows="8" placeholder="Describe your complaint"></textarea>
+							</div>
+							<div class="col-12 mb-3">
+								<label class="form-label">Type:</label>
+								<select id="request_type" name="request_type" class="form-control">
+									<option value="online">Online</option>
+									<option value="offline">On Site</option>
+								</select>
+							</div>
+							<div class="col-12 mb-3">
+								<label class="form-label">Appointment Time:</label>
+								<div class="col-md-12 col-12">
+									<select class="w-100 single-select" id="time" name="day_working_time" onChange="showTime(this)">
+										{% for day_working_time in day_working_times %}
+											{% if day_working_time.available %}
+												<option class="available" value="{{ day_working_time.id }}">{{ day_working_time.time }}</option>
+											{% else %}
+												<option class="not-available" value="{{ day_working_time.id }}" disabled>{{ day_working_time.time }}</option>
+											{% endif %}
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="col-12 mb-3">
+								<div class="row">
+									<div class="col-6">
+										<h6 id="day">Appointment Day: </h6>
+									</div>
+									<div class="col-6">
+										<h6 id="show_time">Appointment Time:</h6>
+									</div>
+								</div>
+								<input id="appointment_date_time" class="form-control" type="text" disabled hidden>
+							</div>							
+							<div class="col-12 mb-3">
+								<h6 id="total">Total: 30$</h6>
+								<input id="price" hidden class="form-control" type="number" name="total" disabled>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-4 d-flex justify-content-between">
+								<button type="submit" class="btn btn-primary">
+									Create Request
+								</button>
+								<a href={% url 'patient:doctors' speciality=doctor.speciality %} class="btn btn-secondary">
+									Back
+								</a>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock content %}
+	
+
+{% block scripts %}
+	<script src={% static 'dashboard/plugins/select2/js/select2.min.js' %}></script>
+	<script src={% static 'dashboard/plugins/tinymce/tinymce.min.js' %}></script>
+	<script>
+		$('.single-select').select2({
+			theme: 'bootstrap4',
+			width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+			placeholder: $(this).data('placeholder'),
+			allowClear: Boolean($(this).data('allow-clear')),
+		});
+		tinymce.init({
+			selector: '#request_content',
+			menubar: 'edit format',
+			branding: false
+		});
+	</script>
+	<script>
+		$(document).ready(function() {
+			const currentURL = window.location.href;
+			const url = new URL(currentURL);
+			const searchParams = new URLSearchParams(url.search);
+			const day = searchParams.get('day');
+			const capitalizedDay = day.charAt(0).toUpperCase() + day.slice(1);
+
+			$("#day").text("Appointment Day: "+capitalizedDay)
+
+			$('#request_type').on('change', function() {
+				if($('#request_type').val() == 'online') {
+					$('#total').text("Total: 30$")
+					$('#price').val(30)
+				} else {
+					$('#total').text("Total: 50$")
+					$('#price').val(50)
+				}
+			});
+		});
+		let appointment_time = $("#time option:selected").text();
+		$("#show_time").text(`Appointment Time: ${appointment_time}`)
+		function showTime(select) {
+			let appointment_time = $("#time option:selected").text();
+			$("#show_time").text(`Appointment Time: ${appointment_time}`)
+		}
+
+	</script>
+{% endblock scripts %}

@@ -1,0 +1,174 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+
+{% block content %}
+	<div class="mb-5">
+		<h3 class="text-center">Your Appointments</h3>
+		<div class="separator"></div>
+	</div>
+	<div class="card">
+		<div class="card-body">
+			<div class="d-flex justify-content-center">
+				<ul class="nav nav-tabs">
+					<li class="nav-item">
+					<a class="nav-link active" data-bs-toggle="tab" href="#active_appointments">Active Appointments</a>
+					</li>
+					<li class="nav-item">
+					<a class="nav-link" data-bs-toggle="tab" href="#previous_appointments">Previous Appointments</a>
+					</li>
+				</ul>
+			</div>
+
+			<div class="tab-content">
+				<div class="tab-pane container active" id="active_appointments">
+					<div class="table-responsive">
+						<table id="active_appointments_table" class="table table-striped table-bordered w-100">
+							<thead>
+								<tr>
+									<th>Patient Name</th>
+									<th>Date</th>
+									<th>Time</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for appointment in active_appointments %}
+								<tr>
+									<td>{{appointment.patient.user.first_name}} {{appointment.patient.user.last_name}}</td>
+									<td>{{appointment.timetable.day|title}}</td>
+									<td>{{appointment.timetable.time}}</td>
+									<td>
+										{% if appointment.request.online and not appointment.meeting_code %}
+											<a class="btn btn-sm btn-primary" href="{% url 'doctor:start_meeting' appointment_id=appointment.id %}">Start Meeting</a>
+										{% endif %}
+										
+										{% if appointment.meeting_code %}
+											<a href="{% url 'doctor:add_prescriptions' appointment_id=appointment.id %}" class="btn btn-sm btn-primary">
+												Add Prescription
+											</a>
+										{% endif %}
+									</td>
+								</tr>
+								<div>
+									<div class="modal fade" id="add_prescription_modal{{appointment.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+										<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+											<h5 class="modal-title" id="exampleModalLabel">Add Prescription</h5>
+											<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+											</div>
+											<div class="modal-body">
+												<form method="POST" id="form" action={% url 'doctor:add_prescription' appointment_id=appointment.id %}>
+													{% csrf_token %}
+													<div class="row" id="prescription_medicine">
+															<label class="form-label">Prescription Content:</label>
+															<!-- <textarea name="prescription_content" class="prescription_content" placeholder="Type prescription content"></textarea> -->
+															<label class="form-label">Medicine Name:</label>
+															<div class="col-12 mb-3">
+																<input class="form-control" type="text" name="medicine[]">
+															</div>
+													</div>
+													<div class="d-flex justify-content-end">
+														<button type="submit" onclick="submitForm()" class="btn btn-primary mt-3" name='status' value='pendding'>Save</button>
+														<button class="btn btn-success mt-3 me-3" id="add_medicine" onclick="addMedicine()">Add Medicine</button>
+													</div>
+												</form>
+											</div>
+										</div>
+										</div>
+									</div>
+								</div>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="tab-pane container" id="previous_appointments">
+					<div class="table-responsive">
+						<table id="previous_appointments_table" class="table table-striped table-bordered w-100">
+							<thead>
+								<tr>
+									<th>Patient Name</th>
+									<th>Date</th>
+									<th>Time</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for appointment in previous_appointments %}
+								<tr>
+									<td>{{appointment.patient.user.first_name}} {{appointment.patient.user.last_name}}</td>
+									<td>{{appointment.timetable.day|title}}</td>
+									<td>{{appointment.timetable.time}}</td>
+									<td>
+										<form method="post" action={% url 'patient:appointment_details' appointment_id=appointment.id %}>
+											{% csrf_token %}
+											<button type="submit" class="btn btn-sm btn-primary">Show Details</button>
+										</form>
+									</td>
+								</tr>
+							{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock content %}
+	
+
+{% block scripts %}
+	<script src={% static 'dashboard/plugins/tinymce/tinymce.min.js' %}></script>
+	<script>
+		tinymce.init({
+			selector: '.prescription_content',
+			menubar: 'edit format',
+			branding: false
+		});
+	</script>
+	<script>
+		function submitForm() {
+			let form = document.getElementById('form');
+			form.submit();
+		}
+		function addMedicine() {
+			event.preventDefault();
+			let prescription_medicine = $('#prescription_medicine');
+			prescription_medicine.append(`
+				<label class="form-label">Medicine Name:</label>
+				<div class="col-12 mb-3">
+					<input class="form-control" type="text" id="" name="medicine[]">
+				</div>
+			`)
+		}
+		$(document).ready(function() {
+			var table = $('#active_appointments_table').DataTable( {
+				lengthChange: false,
+				responsive: true,
+				buttons: ['excel', 'pdf', 'print']
+			});
+
+			var table2 = $('#previous_appointments_table').DataTable( {
+				lengthChange: false,
+				responsive: true,
+				buttons: ['excel', 'pdf', 'print']
+			});
+		
+			table.buttons().container()
+				.appendTo( '#active_appointments_table_wrapper .col-md-6:eq(0)' );
+
+			table2.buttons().container()
+				.appendTo( '#previous_appointments_table_wrapper .col-md-6:eq(0)' );
+			
+			$('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (event) {
+				var tabID = $(event.target).attr('href');
+				if ( tabID === '#previous_appointments' ) {
+					$($.fn.dataTable.tables(true)).DataTable().columns.adjust().responsive.recalc();
+				}
+			});
+		});
+	</script>
+{% endblock scripts %}
+	

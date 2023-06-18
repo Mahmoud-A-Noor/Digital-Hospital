@@ -1,0 +1,471 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--favicon-->
+	<link rel="icon" href={% static 'dashboard/images/logo.png' %} type="image/png" />
+	<!--plugins-->
+	<link href={% static 'dashboard/plugins/perfect-scrollbar/css/perfect-scrollbar.css' %} rel="stylesheet" />
+	<link href={% static 'dashboard/plugins/metismenu/css/metisMenu.min.css' %} rel="stylesheet" />
+	<link href={% static 'dashboard/plugins/datatable/css/dataTables.bootstrap5.min.css' %} rel="stylesheet" />
+	<link href={% static 'dashboard/plugins/datatable/css/dataTables-responsive.min.css' %} rel="stylesheet" />
+	<!-- loader-->
+	<link href={% static 'dashboard/css/pace.min.css' %} rel="stylesheet" />
+	<script src={% static 'dashboard/js/pace.min.js' %}></script>
+	<!-- Bootstrap CSS -->
+	<link href={% static 'dashboard/css/bootstrap.min.css' %} rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+	<link href={% static 'dashboard/css/app.css' %} rel="stylesheet">
+	<link href={% static 'dashboard/css/icons.css' %} rel="stylesheet">
+	<link href={% static 'dashboard/plugins/select2/css/select2.min.css' %} rel="stylesheet" />
+	<link href={% static 'dashboard/plugins/select2/css/select2-bootstrap4.css' %} rel="stylesheet" />
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href={% static 'dashboard/css/dark-theme.css' %} />
+	<link rel="stylesheet" href={% static 'dashboard/css/semi-dark.css' %} />
+	<link rel="stylesheet" href={% static 'dashboard/css/header-colors.css' %} />
+	<link href={% static 'dashboard/css/style.css' %} rel="stylesheet">
+	<link href={% static 'dashboard/css/all.min.css' %} rel="stylesheet">
+	
+		
+	{% if user.user_type == "doctor" %}
+		<script>
+			const socket = new WebSocket('ws://' + window.location.host + '/ws/doctor/{{user.id}}/');
+
+			// Connection established
+			socket.onopen = function(event) {
+				console.log("WebSocket Connection Established")
+				socket.send(text_data="get notification data")
+			}
+
+			// Receive messages from the server
+			socket.onmessage = function(event) {
+				const jsonData = JSON.parse(event.data);
+				const notifications = jsonData["notifications"];
+				const notification_number = jsonData["notification_count"]
+
+				const notification_count = document.getElementById('notification_count');
+				const notification_container = document.getElementById('notification_container');
+
+				if(notification_number > 0){
+					notification_count.innerHTML = notification_number
+					notification_count.style.display = '';
+					notification_container.innerHTML = '';
+				}else{
+					notification_count.style.display = 'none';
+				}
+
+				notifications.forEach(function(notification) {
+					const div = document.createElement('div');
+					div.innerHTML =
+					'<a class="dropdown-item" href=' + notification["url"] + '>' +
+						'<div class="d-flex align-items-center">' +
+						'<div class="notify bg-light-primary text-primary"><i class="bx bxs-bell"></i></div>' +
+						'<div class="flex-grow-1">' +
+							'<h6 class="msg-name">' + notification["title"] + '</h6>' +
+							'<p class="msg-info">' + notification["content"] + '</p>'
+						'</div>' +
+						'</div>' +
+					'</a>';
+
+					
+					notification_container.appendChild(div);
+				});
+				};
+
+			// Connection closed
+			socket.onclose = function(event) {
+			console.log('WebSocket Connection Closed.');
+			};
+		</script>
+	{% endif %}
+		
+	
+		
+	<title>Digital Hospital</title>
+</head>
+
+<body>
+	<!--wrapper-->
+	<div class="wrapper">
+		<!--sidebar wrapper -->
+		<div class="sidebar-wrapper" data-simplebar="true">
+			<div class="sidebar-header">
+				<div>
+					<img src={% static 'dashboard/images/logo.png' %} class="logo-icon" alt="logo icon">
+				</div>
+				<div>
+					<h5 class="logo-text">Digital Hospital</h5>
+				</div>
+				<div class="toggle-icon ms-auto"><i class='bx bx-arrow-to-left'></i>
+				</div>
+			</div>
+			<!--navigation-->
+			<ul class="metismenu" id="menu">
+
+				{% if user.user_type == "manager" %}
+					<li>
+						<a href={% url 'system_admin:doctors' %}>
+							<div class="parent-icon">
+								<i class="fa-solid fa-user-doctor"></i>
+							</div>
+							<div class="menu-title">Doctors</div>
+						</a>
+					</li>
+					<li>
+						<a href={% url 'system_admin:pharmacists' %}>
+							<div class="parent-icon">
+								<img style="width: 25px;" src={% static 'dashboard/images/icons/pharmacist.svg' %}>
+							</div>
+							<div class="menu-title">Pharmacists</div>
+						</a>
+					</li>
+					{% if user.is_superuser %}
+						<li>
+							<a href="/admin">
+								<div class="parent-icon">
+									<img src={% static 'dashboard/images/icons/dashboard.svg' %}>
+								</div>
+								<div class="menu-title">Admin Panel</div>
+							</a>
+						</li>
+					{% endif %}
+				{% endif %}
+					
+				{% if user.user_type == "patient" %}
+					<li>
+						<a href={% url 'patient:requests' %}>
+							<div class="parent-icon">
+								<i class='bx bx-transfer'></i>
+							</div>
+							<div class="menu-title">Requests</div>
+						</a>
+					</li>
+					<li>
+						<a href={% url 'patient:appointments' %}>
+							<div class="parent-icon">
+								<i class='bx bx-time-five'></i>
+							</div>
+							<div class="menu-title">Appointments</div>
+						</a>
+					</li>
+					<li>
+						<a href={% url 'patient:prescriptions' %}>
+							<div class="parent-icon">
+								<i class="fa-solid fa-prescription-bottle-medical"></i>
+							</div>
+							<div class="menu-title">Prescriptions</div>
+						</a>
+					</li>
+					<li>
+						<a href="#" class="has-arrow">
+							<div class="parent-icon"><i class="fa-solid fa-user-doctor"></i>
+							</div>
+							<div class="menu-title">Doctors</div>
+						</a>
+						<ul>
+							<li>
+								<a href={% url 'patient:doctors' speciality="cardiology" %}><i class="bx bx-right-arrow-alt"></i>Cardiology</a>
+							</li>
+							<li> 
+								<a href={% url 'patient:doctors' speciality="dermatology" %}><i class="bx bx-right-arrow-alt"></i>Dermatology</a>
+							</li>
+							<li> 
+								<a href={% url 'patient:doctors' speciality="gastroenterology" %}><i class="bx bx-right-arrow-alt"></i>Gastroenterology</a>
+							</li>
+							<li> 
+								<a href={% url 'patient:doctors' speciality="neurology" %}><i class="bx bx-right-arrow-alt"></i>Neurology</a>
+							</li>
+							<li> 
+								<a href={% url 'patient:doctors' speciality="orthopedics" %}><i class="bx bx-right-arrow-alt"></i>Orthopedics</a>
+							</li>
+							<li> 
+								<a href={% url 'patient:doctors' speciality="pediatrics" %}><i class="bx bx-right-arrow-alt"></i>Pediatrics</a>
+							</li>
+							<li> 
+								<a href={% url 'patient:doctors' speciality="psychiatry" %}><i class="bx bx-right-arrow-alt"></i>Psychiatry</a>
+							</li>
+							<li> 
+								<a href={% url 'patient:doctors' speciality="urology" %}><i class="bx bx-right-arrow-alt"></i>Urology</a>
+							</li>
+						</ul>
+					</li>
+					<li>
+						<a href={% url 'patient:medical_history' %}>
+							<div class="parent-icon">
+								<i class="fa-solid fa-book-medical"></i>
+							</div>
+							<div class="menu-title">Medical History</div>
+						</a>
+					</li>
+				{% elif user.user_type == "doctor" %}
+					<li>
+						<a href={% url 'doctor:requests' %}>
+							<div class="parent-icon">
+								<i class='bx bx-transfer'></i>
+							</div>
+							<div class="menu-title">Requests</div>
+						</a>
+					</li>
+					<li>
+						<a href={% url 'doctor:appointments' %}>
+							<div class="parent-icon">
+								<i class='bx bx-time-five'></i>
+							</div>
+							<div class="menu-title">Appointments</div>
+						</a>
+					</li>
+					<li>
+						<a href={% url 'doctor:prescriptions' %}>
+							<div class="parent-icon">
+								<i class="fa-solid fa-prescription-bottle-medical"></i>
+							</div>
+							<div class="menu-title">Prescriptions</div>
+						</a>
+					</li>
+				{% elif user.user_type == "pharmacist" %}
+					<li>
+						<a href={% url 'pharmacist:prescriptions' %}>
+							<div class="parent-icon">
+								<i class="fa-solid fa-prescription-bottle-medical"></i>
+							</div>
+							<div class="menu-title">Prescriptions</div>
+						</a>
+					</li>
+				{% endif %}
+				<li>
+					<a href="#" class="has-arrow">
+						<div class="parent-icon"><i class="fa-solid fa-robot"></i>
+						</div>
+						<div class="menu-title">AI Detection</div>
+					</a>
+					<ul>
+						<li>
+							<a href={% url 'ai:pneumonia' %}><i class="bx bx-right-arrow-alt"></i>Pneumonia</a>
+						</li>
+						<li> 
+							<a href={% url 'ai:diabetic' %}><i class="bx bx-right-arrow-alt"></i>Diabetic Retinopathy</a>
+						</li>
+						<li> 
+							<a href={% url 'ai:brain_tumor' %}><i class="bx bx-right-arrow-alt"></i>Brain Tumor</a>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<a href={% url 'accounts:profile' %}>
+						<div class="parent-icon">
+							<i class='bx bx-user'></i>
+						</div>
+						<div class="menu-title">Profile</div>
+					</a>
+				</li>
+			</ul>
+			<!--end navigation-->
+		</div>
+		<!--end sidebar wrapper -->
+		<!--start header -->
+		<header>
+			<div class="topbar d-flex align-items-center">
+				<nav class="navbar navbar-expand">
+					<div class="mobile-toggle-menu"><i class='bx bx-menu'></i>
+					</div>
+					<div class="top-menu ms-auto">
+						<ul class="navbar-nav align-items-center">
+							<li class="nav-item mobile-search-icon">
+								<a class="nav-link" href="#">	<i class='bx bx-search'></i>
+								</a>
+							</li>					
+							{% if user.user_type == "doctor" %}
+								<li class="nav-item dropdown dropdown-large">
+									<div style="position: absolute; width: 100%; z-index: 5; height: 100%; cursor: pointer;" onclick="clear_notifications()">
+									</div>
+									<a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> <span id="notification_count" class="alert-count">0</span>
+										<i class='bx bx-bell'></i>
+									</a>
+									<div id="notification_dropdown_menu" class="dropdown-menu dropdown-menu-end">
+										<div class="msg-header">
+											<p class="msg-header-title">Notifications</p>
+										</div>
+										<div id="notification_container" class="header-notifications-list" style="overflow-y: scroll;">
+											<!-- Notifications goes here -->
+										</div>
+									</div>
+								</li>
+							{% endif %}
+						</ul>
+					</div>
+					<div class="user-box dropdown">
+						<a class="d-flex align-items-center nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							{% if user.img %}
+								<img src="{{ user.img.url }}" class="user-img" alt="user avatar">
+							{% else %}
+								<img src={% static 'images/user.jpg' %} class="user-img" alt="user avatar">
+							{% endif %}
+							
+							<div class="user-info ps-3">
+								<p class="user-name mb-0">{{user.username}}</p>
+							</div>
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end">
+							<li><a class="dropdown-item" href={% url 'accounts:profile' %}><i class="bx bx-user"></i><span>Profile</span></a>
+							</li>
+							<li><a class="dropdown-item" href={% url 'accounts:logout' %}><i class='bx bx-log-out-circle'></i><span>Logout</span></a>
+							</li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</header>
+		<!--end header -->
+		<!--start page wrapper -->
+		<div class="page-wrapper">
+			<div class="page-content">
+                {% block content %}
+                    
+                {% endblock content %}
+            </div>
+		</div>
+		<!--end page wrapper -->
+		<!--start overlay-->
+		<div class="overlay toggle-icon"></div>
+		<!--end overlay-->
+		<!--Start Back To Top Button--> <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
+		<!--End Back To Top Button-->
+		<footer class="page-footer">
+			<p class="mb-0">Copyright © 2023. All right reserved.</p>
+		</footer>
+	</div>
+	<!--end wrapper-->
+	<!--start switcher-->
+	<div class="switcher-wrapper">
+		<div class="switcher-btn"> <i class='bx bx-cog bx-spin'></i>
+		</div>
+		<div class="switcher-body">
+			<div class="d-flex align-items-center">
+				<h5 class="mb-0 text-uppercase">Theme Customizer</h5>
+				<button type="button" class="btn-close ms-auto close-switcher" aria-label="Close"></button>
+			</div>
+			<hr/>
+			<h6 class="mb-0">Theme Styles</h6>
+			<hr/>
+			<div class="d-flex align-items-center justify-content-between">
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="flexRadioDefault" id="lightmode" checked>
+					<label class="form-check-label" for="lightmode">Light</label>
+				</div>
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="flexRadioDefault" id="darkmode">
+					<label class="form-check-label" for="darkmode">Dark</label>
+				</div>
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="flexRadioDefault" id="semidark">
+					<label class="form-check-label" for="semidark">Semi Dark</label>
+				</div>
+			</div>
+			<hr/>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" id="minimaltheme" name="flexRadioDefault">
+				<label class="form-check-label" for="minimaltheme">Minimal Theme</label>
+			</div>
+			<hr/>
+			<h6 class="mb-0">Header Colors</h6>
+			<hr/>
+			<div class="header-colors-indigators">
+				<div class="row row-cols-auto g-3">
+					<div class="col">
+						<div class="indigator headercolor1" id="headercolor1"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor2" id="headercolor2"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor3" id="headercolor3"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor4" id="headercolor4"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor5" id="headercolor5"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor6" id="headercolor6"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor7" id="headercolor7"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor8" id="headercolor8"></div>
+					</div>
+				</div>
+			</div>
+			<hr/>
+			<h6 class="mb-0">Sidebar Colors</h6>
+			<hr/>
+			<div class="header-colors-indigators">
+				<div class="row row-cols-auto g-3">
+					<div class="col">
+						<div class="indigator sidebarcolor1" id="sidebarcolor1"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor2" id="sidebarcolor2"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor3" id="sidebarcolor3"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor4" id="sidebarcolor4"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor5" id="sidebarcolor5"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor6" id="sidebarcolor6"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor7" id="sidebarcolor7"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor8" id="sidebarcolor8"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--end switcher-->
+	<!-- Bootstrap JS -->
+	<script src={% static 'dashboard/js/bootstrap.bundle.min.js' %}></script>
+	<!--plugins-->
+	<script src={% static 'dashboard/js/jquery.min.js' %}></script>
+	<script src={% static 'dashboard/js/all.min.js' %}></script>
+	<script src={% static 'dashboard/plugins/metismenu/js/metisMenu.min.js' %}></script>
+	<!--app JS-->
+	<script src={% static 'dashboard/js/app.js' %}></script>
+    <!--table JS-->
+    <script src={% static 'dashboard/plugins/datatable/js/jquery.dataTables.min.js' %}></script>
+    <script src={% static 'dashboard/plugins/datatable/js/dataTables.bootstrap5.min.js' %}></script>
+    <script>
+		const notification_dropdown = document.getElementById("notification_dropdown_menu")
+		function clear_notifications() {
+			notification_dropdown.classList.toggle("show");
+			fetch("{% url 'mark_user_notifications_as_read' %}")
+			.then(response => {
+				if (response.ok) {
+				} else {
+					throw new Error('Request failed');
+				}
+			})
+			notification_count.style.display = 'none';
+		}
+	</script>
+        
+		{% block scripts %}
+			
+		{% endblock scripts %}
+			
+</body>
+
+</html>

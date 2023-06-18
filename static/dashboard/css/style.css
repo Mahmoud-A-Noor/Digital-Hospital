@@ -1,0 +1,72 @@
+.separator {
+    background-color: #008CFF;
+    width: 70px;
+    height: 4px;
+    border-radius: 20px;
+    margin: auto
+}
+
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    color: #008CFF !important;
+}
+
+#previewImage{
+    max-width: 200px;
+    min-height: 150px;
+    max-height: 200px;
+    margin: 0 auto;
+    padding-top: 10px;
+}
+
+option:disabled {
+    text-decoration: line-through;
+}
+
+.select2-results__option {
+    color: white !important;
+}
+
+.select2-container--bootstrap4 .select2-results__option--highlighted, .select2-container--bootstrap4 .select2-results__option--highlighted.select2-results__option[aria-selected=true] {
+    background-color: #28a745 !important;
+}
+
+.select2-results__option[aria-selected="false"], .select2-container--bootstrap4 .select2-dropdown .select2-results__option[aria-selected=true] {
+    background-color: #28a745;
+}
+
+.select2-results__option[aria-disabled="true"] {
+    text-decoration: line-through;
+    background-color: #dc3545;
+}
+
+.tox-statusbar, .tox-notifications-container {
+    display: none !important;
+}
+
+.record-img {
+    width: 100%;
+    height: 200px;
+}
+
+.record-img-div {
+    cursor: pointer;
+    transition: 1s all;
+}
+
+.delete-record {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+    top: 4%;
+    left: 2%;
+}
+
+.record-img-div:hover .delete-record {
+    display: block;
+}
+
+.medicine {
+    background-color: #F2F2F2;
+    border-radius: 10px;
+}

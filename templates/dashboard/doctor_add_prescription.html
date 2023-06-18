@@ -1,0 +1,51 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+
+{% block content %}
+	<div class="mb-5">
+		<h3 class="text-center">Your Appointments</h3>
+		<div class="separator"></div>
+	</div>
+	<div class="card">
+		<div class="card-body">
+            <form method="POST" id="form" action={% url 'doctor:add_prescription' appointment_id=appointment_id %}>
+                {% csrf_token %}
+                <div class="row" id="prescription_medicine">
+                        <label class="form-label">Prescription Content:</label>
+                        <textarea name="prescription_content" class="prescription_content" placeholder="Type prescription content"></textarea>
+                        <label class="form-label">Medicine Name:</label>
+                        <div class="col-12 mb-3">
+                            <input class="form-control" type="text" name="medicine[]">
+                        </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-success mt-3 me-3" id="add_medicine" onclick="addMedicine()">Add Medicine</button>
+                    <button type="submit" class="btn btn-primary mt-3" name='status' value='pendding'>Save</button>
+                </div>
+            </form>
+		</div>
+	</div>
+{% endblock content %}
+	
+
+{% block scripts %}
+	<script src={% static 'dashboard/plugins/tinymce/tinymce.min.js' %}></script>
+	<script>
+		tinymce.init({
+			selector: '.prescription_content',
+			menubar: 'edit format',
+			branding: false
+		});
+		function addMedicine() {
+			event.preventDefault();
+			let prescription_medicine = $('#prescription_medicine');
+			prescription_medicine.append(`
+				<label class="form-label">Medicine Name:</label>
+				<div class="col-12 mb-3">
+						<input class="form-control" type="text" name="medicine[]">
+				</div>
+			`)
+		}
+	</script>
+{% endblock scripts %}

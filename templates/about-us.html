@@ -1,0 +1,37 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block styles %}
+    <link rel="stylesheet" href={% static 'css/aos.css' %}>
+{% endblock %}
+
+
+{% block content %}
+    <section class="py-5 mt-5">
+        <h3 class="text-center">About Us</h3>
+        <div class="separator"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-6 d-flex align-items-center" data-aos="fade-right" data-aos-duration="2000" data-aos-delay="300">
+                    <p class="my-3 my-lg-0">
+                        Digital Hospital is a healthcare technology company that offers innovative digital solutions to streamline hospital operations and enhance patient care. Their comprehensive system includes modules for pharmacy management, and AI-based disease diagnosis. With a focus on patient-centricity, user-friendly interfaces, and customizable features, Digital Hospital aims to improve efficiency, communication, and patient outcomes. They prioritize security, scalability, and reliability, offering ongoing support and updates. By partnering with Digital Hospital, hospitals can benefit from advanced technology and drive positive changes in healthcare delivery.
+                    </p>
+                </div>
+                <div class="col-12 col-md-6" data-aos="fade-left" data-aos-duration="2000" data-aos-delay="300">
+                    <img class="img-fluid" src={% static 'images/3796679.jpg' %}>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+
+{% block scripts %}
+    <script src={% static 'js/aos.js' %}></script>
+    <script>
+    AOS.init({
+        disable: 'phone'
+    });
+    </script>
+{% endblock %}

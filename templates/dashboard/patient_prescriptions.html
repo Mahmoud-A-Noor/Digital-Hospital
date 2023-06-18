@@ -1,0 +1,95 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+
+{% block content %}
+	<div class="mb-5">
+		<h3 class="text-center">Your Prescriptions</h3>
+		<div class="separator"></div>
+	</div>
+	<div class="card">
+		<div class="card-body">
+
+            <div class="table-responsive">
+                <table id="prescriptions_table" class="table table-striped table-bordered w-100">
+                    <thead>
+                        <tr>
+                            <th>Doctor Name</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prescription in prescriptions %}
+                            <tr>
+                                <td>{{prescription.doctor}}</td>
+                                <td>{{prescription.date}}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#show_prescription_modal{{appointment.id}}">
+                                        Show Prescription
+                                    </button>
+
+                                    <a href="{% url 'patient:prescription_payment' total_cost=prescription.total_cost %}" type="button" class="btn btn-sm btn-success">
+                                        Pay
+                                    </a>
+
+                                </td>
+                                <div>
+                                    <div class="modal fade" id="show_prescription_modal{{appointment.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Prescription</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-12 mb-3">
+                                                        <h6>Prescription Content:</h6>
+                                                        <p class="mb-0">{{prescription.content}}</p>
+                                                    </div>
+                                                    <div class="col-12 mb-3">
+                                                        <h6>Medical Treatment:</h6>
+                                                    </div>
+                                                    {% for m in prescription.medication %}
+                                                        <div class="col-12 mb-3">
+                                                            <div class="medicine px-3 py-2">
+                                                                <h6>{{m.drug_name}}</h6>
+                                                                <p class="mb-0">{{m.cost}}</p>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                    <!-- calculate total here -->
+                                                    <h6 class="text-end">Total: {{prescription.total_cost}}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
+            </div>
+		</div>
+	</div>
+{% endblock content %}
+	
+
+{% block scripts %}
+	<script>
+		$(document).ready(function() {
+			var table = $('#prescriptions_table').DataTable( {
+				lengthChange: false,
+				responsive: true,
+				buttons: ['excel', 'pdf', 'print']
+			});
+
+			table.buttons().container()
+				.appendTo( '#prescriptions_table_wrapper .col-md-6:eq(0)' );
+		});
+	</script>
+{% endblock scripts %}
+	
