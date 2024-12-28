@@ -55,7 +55,7 @@ npm install
 3. Create a `.env` file in the backend directory and configure the following variables:
 
 ```backend env
-DJANGO_SECRET_KEY=<your_django_secret_key>
+SECRET_KEY=<your_django_secret_key>
 DB_NAME=<your_mysql_database_name>
 DB_USER=<your_mysql_username>
 DB_PASSWORD=<your_mysql_password>
@@ -65,6 +65,8 @@ EMAIL_PORT=<your_smtp_port>
 EMAIL_USE_TLS=True
 EMAIL_HOST_USER=<your_email_address>
 EMAIL_HOST_PASSWORD=<your_email_password>
+STRIPE_PUBLISHABLE_KEY = <your_stripe_publishable_key>
+STRIPE_SECRET_KEY = <your_stripe_secret_key>
 ```
 
 4. Set up Docker:
