@@ -33,6 +33,20 @@ A comprehensive digital healthcare platform designed to streamline communication
 
 ---
 
+
+## Project Structure
+```
+digital-hospital/
+├── backend/            # Django backend
+├── frontend/           # React frontend (if applicable)
+├── docker-compose.yml  # Docker setup for containerized deployment
+├── .env                # Environment variables
+├── requirements.txt    # Backend dependencies
+├── package.json        # Frontend dependencies
+└── README.md           # Project documentation
+```
+---
+
 ## Installation and Setup
 
 1. Clone the repository:
@@ -129,19 +143,6 @@ Open your browser and visit http://localhost:8000 to access the platform.
 ![patient_8](https://github.com/Mahmoud-A-Noor/Digital-Hospital/assets/59361888/312b0cdc-1f92-458a-a368-c3b02ccb39ad)
 ---
 
-
-## Folder Structure
-```
-digital-hospital/
-├── backend/            # Django backend
-├── frontend/           # React frontend (if applicable)
-├── docker-compose.yml  # Docker setup for containerized deployment
-├── .env                # Environment variables
-├── requirements.txt    # Backend dependencies
-├── package.json        # Frontend dependencies
-├── README.md           # Project documentation
-```
----
 
 ## Contributing
 
